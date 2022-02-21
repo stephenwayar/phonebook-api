@@ -18,19 +18,19 @@ const phonebookSchema = new mongoose.Schema({
 
 const Phonebook = mongoose.model('Phonebook', phonebookSchema)
 
-// const person = new Phonebook({
-//   name: "Stephen Wayar",
-//   number: 224110789
-// })
+const person = new Phonebook({
+  name: process.argv[3],
+  number: process.argv[4]
+})
 
-// person.save().then(result => {
-//   console.log('Person saved!')
-//   mongoose.connection.close()
-// })
-
-Phonebook.find({}).then(result => {
-  result.forEach(person => {
-    console.log(person)
-  })
+person.save().then(result => {
+  console.log('Added', process.argv[3], 'number:', process.argv[4], 'to phonebook')
   mongoose.connection.close()
 })
+
+// Phonebook.find({}).then(result => {
+//   result.forEach(person => {
+//     console.log(person)
+//   })
+//   mongoose.connection.close()
+// })
