@@ -5,11 +5,13 @@ if (process.argv.length < 3) {
   process.exit(1)
 }
 
-const password = process.argv[2]
+const url = process.env.MONGODB_URI
 
-const url = `mongodb+srv://stephenwayar:${password}@dev.8sp8s.mongodb.net/phonebookApp?retryWrites=true&w=majority`
-
-mongoose.connect(url)
+mongoose.connect(url).then(() => {
+  console.log("Successfully connected to MongoDB")
+}).catch(err => {
+  console.log("Failed to connect to mongoDB:", err)
+})
 
 const phonebookSchema = new mongoose.Schema({
   name: String,

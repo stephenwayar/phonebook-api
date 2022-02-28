@@ -1,96 +1,65 @@
+require('dotenv').config()
+
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const Phonebook = require('./models/phonebook')
 
 app.use(express.static('build'))
 app.use(express.json())
 app.use(cors())
 
-let persons = [
-  { 
-    "id": 1,
-    "name": "Arto Hellas", 
-    "number": "040-123456"
-  },
-  { 
-    "id": 2,
-    "name": "Ada Lovelace", 
-    "number": "39-44-5323523"
-  },
-  { 
-    "id": 3,
-    "name": "Dan Abramov", 
-    "number": "12-43-234345"
-  },
-  { 
-    "id": 4,
-    "name": "Mary Poppendieck", 
-    "number": "39-23-6423122"
-  }
-]
-
-const date = new Date()
-
-function generateId(){
-  const maxId = persons.length > 0 
-    ? Math.max(...persons.map(person => person.id)) 
-    : 0
-  return maxId + 1  
-}
-
-//API routes
+//routes
 
 app.get('/', (req, res) => {
   res.send(`<h1>App root</h1>`)
 })
 
 app.get('/api/persons', (req, res) => {
-  res.json(persons)
+  Phonebook.find({}).then((notes) => {
+    res.json(notes)
+  })
 })
 
 app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const personObj = persons.find(person => person.id === id)
-  if(personObj){res.json(personObj)}
-  else{res.status(404).end()}
+  Phonebook.findById(req.params.id).then(note => {
+    res.json(note)
+  })
 })
 
-app.get('/api/info', (req, res) => {
-  res.status(200).send(`<h3>Phonebook has info for ${persons.length} people.</h3> <br> ${date}`)
-})
+// app.get('/api/info', (req, res) => {
+//   res.status(200).send(`<h3>Phonebook has info for ${persons.length} people.</h3> <br> ${date}`)
+// })
 
 app.post('/api/persons', (req, res) => {
   const body = req.body
-  const nameFinder = persons.find(person => person.name === body.name)
 
-  if(!body.name || !body.number){
-    return res.status(400).json({
-      errMessage: "Name or Number content missing"
+  if(body === undefined){
+    return(res.status(400).json({
+      erroMessage: "Content Missing"
     })
-  }else if(nameFinder){
-    return res.status(400).json({
-      errMessage: "Name must be unique"
-    })
+    )
   }
 
-  const person = {
-    id: generateId(),
+  const person = new Phonebook({
     name: body.name,
     number: body.number
-  }
-  persons = persons.concat(person)
-  console.log(persons)
-  res.json(person)
+  })
+
+  person.save().then((person) => {
+    res.json(person)
+    console.log("Person saved!")
+  })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  persons = persons.filter(person => person.id !== id)
-  // console.log(persons)
-  res.status(204).end()
+  Phonebook.findByIdAndDelete(req.params.id).then(() => {
+    res.status(200).end()
+  })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
+
 app.listen(PORT, () => {
   console.log(`Server is running at PORT ${PORT}`)
 })
