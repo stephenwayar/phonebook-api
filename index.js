@@ -15,6 +15,21 @@ app.get('/', (req, res) => {
   res.send(`<h1>App root</h1>`)
 })
 
+app.get('/api/info', (req, res) => {
+  const date = new Date()
+
+  Phonebook.find({}).then(persons => {
+    res.send(`
+      <div>
+        <h2>Phonebook has info for ${persons.length} people</h2>
+
+        <p>${date}</p>
+      </div>
+      `
+    )
+  })
+})
+
 app.get('/api/persons', (req, res) => {
   Phonebook.find({}).then((notes) => {
     res.json(notes)
@@ -24,20 +39,19 @@ app.get('/api/persons', (req, res) => {
 app.get('/api/persons/:id', (req, res) => {
   Phonebook.findById(req.params.id).then(note => {
     res.json(note)
-  })
+  }).catch(error => next(error))
 })
-
-// app.get('/api/info', (req, res) => {
-//   res.status(200).send(`<h3>Phonebook has info for ${persons.length} people.</h3> <br> ${date}`)
-// })
 
 app.post('/api/persons', (req, res) => {
   const body = req.body
 
-  if(body === undefined){
-    return(res.status(400).json({
-      erroMessage: "Content Missing"
-    })
+  if(body.name === undefined || body.number === undefined){
+    return(
+      res
+        .status(400)
+        .json({
+          erroMessage: "Content Missing"
+        })
     )
   }
 
@@ -55,8 +69,43 @@ app.post('/api/persons', (req, res) => {
 app.delete('/api/persons/:id', (req, res) => {
   Phonebook.findByIdAndDelete(req.params.id).then(() => {
     res.status(200).end()
-  })
+  }).catch(error => next(error))
 })
+
+app.put('/api/persons/:id', (req, res) => {
+  const body = req.body
+
+  if(body.name === undefined || body.number === undefined){
+    res.status(400).json({
+      erroMessage: 'Content missing'
+    })
+  }
+
+  const person = {
+    name: body.name,
+    number: body.number
+  }
+
+  Phonebook.findByIdAndUpdate(req.params.id, person, {new: true}).then(updatedPerson => {
+    res.json(updatedPerson)
+  }).catch(error => next(error))
+})
+
+const unknownEndpoint = (req, res) => {
+  res.status(404).send({erroMessage: 'unknown endpoint'})
+}
+
+app.use(unknownEndpoint)
+
+const errorHandler = (error, req, res, next) => {
+  console.log(error.message)
+  if(error.name === "CastError"){
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+  next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 
