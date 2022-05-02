@@ -2,12 +2,28 @@ require('dotenv').config()
 
 const express = require('express')
 const app = express()
+const mongoose = require('mongoose')
 const cors = require('cors')
+const morgan = require('morgan')
+
 const Phonebook = require('./models/phonebook')
 
 app.use(express.static('build'))
 app.use(express.json())
 app.use(cors())
+app.use(morgan("tiny"))
+
+//MongoDB connect
+
+console.log("Connecting to mongoDB...")
+
+const url = process.env.MONGODB_URI
+
+mongoose.connect(url).then(() => {
+  console.log("Successfully connected to MongoDB")
+}).catch(err => {
+  console.log("Failed to connect to mongoDB:", err)
+})
 
 //routes
 
@@ -31,14 +47,14 @@ app.get('/api/info', (req, res) => {
 })
 
 app.get('/api/persons', (req, res) => {
-  Phonebook.find({}).then((notes) => {
-    res.json(notes)
+  Phonebook.find({}).then((persons) => {
+    res.json(persons)
   })
 })
 
 app.get('/api/persons/:id', (req, res) => {
-  Phonebook.findById(req.params.id).then(note => {
-    res.json(note)
+  Phonebook.findById(req.params.id).then(person => {
+    res.json(person)
   }).catch(error => next(error))
 })
 
