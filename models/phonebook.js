@@ -4,11 +4,13 @@ const mongoose = require('mongoose')
 const phonebookSchema = new mongoose.Schema({
   name: {
     type: String,
-    minlength: 3
+    minlength: 3,
+    required: true
   },
   number: {
     type: Number,
-    minlength: 5
+    minlength: 3,
+    required: true
   }
 })
 
