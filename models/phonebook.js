@@ -9,8 +9,14 @@ const phonebookSchema = new mongoose.Schema({
   },
   number: {
     type: Number,
-    minlength: 3,
-    required: true
+    required: true,
+    min: 8,
+    // validate: {
+    //   validator: function(v) {
+    //     return /\+\d{8}/.test(v);
+    //   },
+    //   message: props => `${props.value} is not a valid phone number!`
+    // },
   }
 })
 

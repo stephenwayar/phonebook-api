@@ -72,8 +72,8 @@ app.post('/api/persons', (req, res, next) => {
   }).catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (req, res, next) => {
-  Phonebook.findByIdAndDelete(req.params.id).then(() => {
+app.delete('/api/notes/:id', (req, res, next) => {
+  Note.findByIdAndDelete(req.params.id).then(() => {
     res.status(200).end()
   }).catch(error => next(error))
 })
